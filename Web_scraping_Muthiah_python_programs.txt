@@ -1,0 +1,159 @@
+libraries to install before execution of the programs
+
+#1 program
+
+pip install requests
+pip install requests-html
+
+#2program
+pip install requests 
+pip install beautifulsoup4 
+pip install lxml
+
+#3program
+pip install requests
+pip install opencv-python
+pip install beautifulsoup4
+
+
+instructions to do in the program in program 3 kindly change the path of the qr code as per you system, the given path is of my system
+qr_code_path = 'D:\\web scraping\\imgs\\w3 schools.png'  # Replace with the actual path to your QR code image
+
+
+
+#1_paragraph_keyword program
+
+import requests
+from requests_html import HTMLSession
+
+visited_links = []
+keywords = ["python"]
+counter = 0
+
+def scrape(r):
+    global counter
+    results = r.html.find("p")
+    for result in results:
+        if any(keyword in result.text.lower() for keyword in keywords):
+            print(f"{r.url}: {result.text.strip()}")
+        counter += 1
+
+def crawl(url, session):
+    global visited_links
+    global counter
+
+    r = session.get(url)
+    scrape(r)
+
+    for link in r.html.absolute_links:
+        if len(visited_links) >= 5:
+            break
+        if link not in visited_links and all(keyword in link for keyword in keywords):
+            visited_links.append(link)
+            crawl(link, session)
+
+def main(url):
+    session = HTMLSession()
+    crawl(url, session)
+    print("Visited Links:", visited_links)
+    print("Number of paragraphs found:", counter)
+
+if __name__ == '__main__':
+    url = "https://www.w3schools.com/"
+    main(url)
+
+=============================================================================================
+
+#2_program_to_extract_image_from_website
+
+import requests
+from bs4 import BeautifulSoup
+import os
+
+url = "https://en.wikipedia.org/wiki/Flags_of_the_U.S._states_and_territories"
+r = requests.get(url)
+soup = BeautifulSoup(r.text, "lxml")
+images = soup.find_all('img', class_="mw-file-element")
+
+# Create a directory to save images if it doesn't exist
+os.makedirs('flags', exist_ok=True)
+
+for image in images:
+    # Construct the full URL
+    link = image['src']
+    if link.startswith("//"):
+        link = "https:" + link
+    
+    # Sanitize the filename
+    filename = os.path.join('flags', os.path.basename(link).replace('/', '_').replace(' ', '_'))
+
+    # Fetch and save the image
+    with open(filename, 'wb') as f:
+        im = requests.get(link)
+        f.write(im.content)
+
+    print(f"Downloaded {filename}")
+
+===============================================================================================
+
+#3_Qr_detection_and_search_of_a_keyword_in_the_website
+
+
+import cv2
+import requests
+from bs4 import BeautifulSoup
+
+def scan_qr_code(image_path):
+    # Read the image using OpenCV
+    img = cv2.imread(image_path)
+    if img is None:
+        raise ValueError("Image not found or unable to open.")
+    
+    # Initialize QRCodeDetector
+    detector = cv2.QRCodeDetector()
+    
+    # Detect and decode the QR code
+    data, bbox, straight_qrcode = detector.detectAndDecode(img)
+    if data:
+        return data
+    else:
+        raise ValueError("No QR code found in the image.")
+
+def fetch_website_content(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        return response.text
+    except requests.RequestException as e:
+        print(f"Error fetching the website content: {e}")
+        return None
+
+def search_keyword_in_html(html_content, keyword):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    # Search for the keyword in the text of the website
+    results = soup.find_all(string=lambda text: text and keyword.lower() in text.lower())
+    return results
+
+# Main function
+if __name__ == "__main__":
+    qr_code_path = 'D:\\web scraping\\imgs\\w3 schools.png'  # Replace with the actual path to your QR code image
+    keyword = 'python'  # Replace with the keyword you want to search for
+    
+    try:
+        url = scan_qr_code(qr_code_path)
+        print(f"URL from QR code: {url}")
+        
+        if url:
+            html_content = fetch_website_content(url)
+            if html_content:
+                search_results = search_keyword_in_html(html_content, keyword)
+                print(f"Found {len(search_results)} results containing the keyword '{keyword}':")
+                for result in search_results:
+                    print(result.strip())
+    except ValueError as e:
+        print(e)
+
+
+
+
+=================================================================================================

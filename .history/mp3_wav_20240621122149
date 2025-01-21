@@ -1,0 +1,19 @@
+import os
+from pydub import AudioSegment
+
+def convert_mp3_to_wav(mp3_file_path, wav_file_path):
+    # Ensure the directory exists
+    output_dir = os.path.dirname(wav_file_path)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Load the MP3 file
+    audio = AudioSegment.from_mp3(mp3_file_path)
+    
+    # Export as WAV
+    audio.export(wav_file_path, format="wav")
+
+# Example usage
+mp3_file_path = "D:/web scraping/downloaded_audio/audio.mp3"
+wav_file_path = "D:/web scraping/downloaded_audio/output_audio.wav"
+convert_mp3_to_wav(mp3_file_path, wav_file_path)

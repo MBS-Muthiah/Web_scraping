@@ -1,0 +1,103 @@
+libraries to be installed for step 1:
+pip install requests
+
+libraries to be installed for step 2:
+pip install PyPDF2
+
+
+instructions:
+
+locally save the pdf file in your system so that it is visible in the html file.
+first save the html file and open with live server
+
+while executing the program 1 and program 2 keep the html running the background with help of live server extension
+
+in the step 2 change the path of the file as per your system
+
+execute program 1 first it will scrape  the pdf from the website
+after successful execution of step1 
+excute program 2 it will read the text in the pdf file and generate a output of the text in the console and search for a keyword from the text of pdf and return the page number the keyword is found.
+
+
+
+
+
+
+
+======================================================================================
+
+HTML file of a sample website containing the PDF
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pdf website</title>
+</head>
+<body>
+    <h1>this website consits of pdf file</h1>
+    <embed src="Muthiah_Resume_.pdf" type="application/pdf" width="300" height="300">
+</body>
+</html>
+
+=======================================================================================
+
+#step 1 to scrape the pdf from the website
+
+import requests
+
+url = "http://127.0.0.1:5500/Muthiah_Resume_.pdf"
+
+try:
+    r = requests.get(url, stream=True)
+    r.raise_for_status()  # Check for HTTP errors
+
+    with open("file1.pdf", "wb") as pdf:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk:
+                pdf.write(chunk)
+    print("Download complete!")
+except requests.exceptions.RequestException as e:
+    print(f"An error occurred: {e}")
+
+========================================================================================
+
+'''step 2 to Read the content from the website and giving the page no as output of the searched keyword.'''
+
+import PyPDF2
+
+def find_keyword_in_pdf(pdf_file_path, keyword):
+    # Open the PDF file in binary read mode
+    with open(pdf_file_path, 'rb') as pdf_file_obj:
+        # Create a PdfReader object
+        pdfReader = PyPDF2.PdfReader(pdf_file_obj)
+        
+        # Initialize an empty list to store page numbers
+        pages_with_keyword = []
+        
+        # Iterate through each page
+        for page_num in range(len(pdfReader.pages)):
+            # Get a specific page
+            page_obj = pdfReader.pages[page_num]
+            
+            # Extract text from the page
+            page_text = page_obj.extract_text()
+            
+            # Check if the keyword is in the extracted text
+            if keyword in page_text:
+                # Append the page number (starting from 1) to the list
+                pages_with_keyword.append(page_num + 1)  # Page numbers are 1-indexed
+        
+        # Print the results
+        if pages_with_keyword:
+            print(f"Keyword '{keyword}' found on page(s): {', '.join(map(str, pages_with_keyword))}")
+        else:
+            print(f"Keyword '{keyword}' not found in the PDF.")
+
+# Example usage
+pdf_file_path = "file1.pdf"
+keyword_to_find = "muthiah"
+
+find_keyword_in_pdf(pdf_file_path, keyword_to_find)
+===========================================================================================

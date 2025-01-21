@@ -1,0 +1,2 @@
+#define BLYNK_TEMPLATE_NAME "CarTesting"
+#define BLYNK_AUTH_TOKEN "IAA_Enhra9NPx8P7l9-503WTtJpbzdNC"
